@@ -1,1 +1,5 @@
 /other
+/boot_usb/gcc
+/freertos/gcc
+/uart_echo/gcc
+/usb_dev_serial/gcc
