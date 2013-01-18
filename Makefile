@@ -25,38 +25,11 @@
 #
 # A list of the directories containing the examples.
 #
-DIRS=audio             \
-     bitband           \
-     blinky            \
-     boot_demo1        \
-     boot_demo2        \
-     boot_demo_usb     \
-     boot_usb          \
-     gpio_jtag         \
-     grlib_demo        \
-     hello             \
-     interrupts        \
-     mpu_fault         \
-     pwmgen            \
-     qs-scope          \
-     sd_card           \
-     timers            \
+DIRS=boot_usb          \
+     freertos          \
      uart_echo         \
-     udma_demo         \
-     usb_boot_demo1    \
-     usb_boot_demo2    \
-     usb_dev_bulk      \
-     usb_dev_cserial   \
-     usb_dev_keyboard  \
-     usb_dev_mouse     \
-     usb_dev_msc       \
-     usb_dev_serial    \
-     usb_host_msc      \
-     usb_host_keyboard \
-     usb_host_mouse    \
-     usb_stick_demo    \
-     usb_stick_update  \
-     watchdog         
+     usb_dev_serial
+        
 
 #
 # The default rule, which causes the examples to be built.

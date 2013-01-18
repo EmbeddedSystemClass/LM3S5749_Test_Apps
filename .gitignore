@@ -3,3 +3,6 @@
 /freertos/gcc
 /uart_echo/gcc
 /usb_dev_serial/gcc
+
+*.o
+*.d
