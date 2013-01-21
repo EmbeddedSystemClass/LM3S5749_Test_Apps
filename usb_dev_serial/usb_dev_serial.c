@@ -39,9 +39,6 @@
 #include "usblib/usb-ids.h"
 #include "usblib/device/usbdevice.h"
 #include "usblib/device/usbdcdc.h"
-#ifdef DEBUG
-#include "utils/uartstdio.h"
-#endif
 #include "utils/ustdlib.h"
 #include "usb_serial_structs.h"
 
@@ -108,28 +105,16 @@
 //*****************************************************************************
 volatile unsigned long g_ulUARTTxCount = 0;
 volatile unsigned long g_ulUARTRxCount = 0;
-#ifdef DEBUG
-unsigned long g_ulUARTRxErrors = 0;
-#endif
 
-//*****************************************************************************
-//
-// The base address, peripheral ID and interrupt ID of the UART that is to
-// be redirected.
-//
-//*****************************************************************************
-#ifdef REDIRECT_UART1
-//*****************************************************************************
-//
-// Defines required to redirect UART1 via USB.  This frees UART0 for debug
-// information but would require some board additions to get U1TX and U1RX to
-// a suitable serial connector.
-//
-//*****************************************************************************
-#define USB_UART_BASE           UART1_BASE
-#define USB_UART_PERIPH         SYSCTL_PERIPH_UART1
-#define USB_UART_INT            INT_UART1
-#else
+
+
+/* TESTING */
+unsigned char uartBuf[32];
+unsigned char uartBufIdx = 0;
+/* TESTING */
+
+
+
 //*****************************************************************************
 //
 // Defines required to redirect UART0 via USB.
@@ -138,7 +123,6 @@ unsigned long g_ulUARTRxErrors = 0;
 #define USB_UART_BASE           UART0_BASE
 #define USB_UART_PERIPH         SYSCTL_PERIPH_UART0
 #define USB_UART_INT            INT_UART0
-#endif
 
 //*****************************************************************************
 //
@@ -151,27 +135,6 @@ unsigned long g_ulUARTRxErrors = 0;
 
 //*****************************************************************************
 //
-// GPIO peripherals and pins muxed with the redirected UART.  These will depend
-// upon the IC in use and the UART selected in USB_UART_BASE.  Be careful that
-// these settings all agree with the hardware you are using.
-//
-//*****************************************************************************
-#ifdef REDIRECT_UART1
-//*****************************************************************************
-//
-// Defines required to redirect UART1 via USB.
-//
-//*****************************************************************************
-#define TX_GPIO_BASE            GPIO_PORTD_BASE
-#define TX_GPIO_PERIPH          SYSCTL_PERIPH_GPIOD
-#define TX_GPIO_PIN             GPIO_PIN_3
-
-#define RX_GPIO_BASE            GPIO_PORTD_BASE
-#define RX_GPIO_PERIPH          SYSCTL_PERIPH_GPIOD
-#define RX_GPIO_PIN             GPIO_PIN_2
-#else
-//*****************************************************************************
-//
 // Defines required to redirect UART0 via USB.
 //
 //*****************************************************************************
@@ -182,41 +145,7 @@ unsigned long g_ulUARTRxErrors = 0;
 #define RX_GPIO_BASE            GPIO_PORTA_BASE
 #define RX_GPIO_PERIPH          SYSCTL_PERIPH_GPIOA
 #define RX_GPIO_PIN             GPIO_PIN_0
-#endif
 
-//*****************************************************************************
-//
-// Debug-related definitions and declarations.
-//
-// Debug output is available via UART0 if flag DEBUG is defined in the build
-// and we are not using UART0 as the UART that is being redirected via USB.
-//
-//*****************************************************************************
-#if (defined DEBUG) && (USB_UART_BASE != UART0_BASE)
-//*****************************************************************************
-//
-// Map all debug print calls to UARTprintf in debug builds.
-//
-//*****************************************************************************
-#define DEBUG_PRINT             UARTprintf
-
-//*****************************************************************************
-//
-// Global file handle for the debug printing.
-//
-//*****************************************************************************
-int g_iHandle;
-
-//*****************************************************************************
-//
-// Define the following if you want to echo characters passed through the
-// USB-redirected UART to the debug port too.  This is not recommended if you
-// intend to pass lots of data through the device! Use only for debug purposes.
-//
-//*****************************************************************************
-//#define ECHO_TO_DEBUG
-
-#else
 
 //*****************************************************************************
 //
@@ -225,7 +154,6 @@ int g_iHandle;
 //*****************************************************************************
 #define DEBUG_PRINT while(0) ((int (*)(char *, ...))0)
 #define g_iHandle 0
-#endif
 
 //*****************************************************************************
 //
@@ -271,20 +199,6 @@ static tBoolean SetLineCoding(tLineCoding *psLineCoding);
 static void GetLineCoding(tLineCoding *psLineCoding);
 static void SendBreak(tBoolean bSend);
 
-//*****************************************************************************
-//
-// The error routine that is called if the driver library encounters an error.
-//
-//*****************************************************************************
-#ifdef DEBUG
-void
-__error__(char *pcFilename, unsigned long ulLine)
-{
-    while(1)
-    {
-    }
-}
-#endif
 
 //*****************************************************************************
 //
@@ -398,36 +312,13 @@ ReadUARTData(void)
             //
             ulSpace--;
 
-#ifdef ECHO_TO_DEBUG
-            //
-            // If configured to do this, echo the received character to the
-            // debug port.
-            //
-            DEBUG_PRINT("RX: %c\n",
-                        g_pcUSBTxBuffer[g_ulUARTRxWriteIndex]);
-#endif
         }
         else
         {
-#ifdef DEBUG
-            //
-            // Increment our receive error counter.
-            //
-            g_ulUARTRxErrors++;
-#endif
             //
             // Update our error accumulator.
             //
             lErrors |= lChar;
-
-#ifdef ECHO_TO_DEBUG
-            //
-            // If configured to do this, echo the received character to the
-            // debug port.
-            //
-            DEBUG_PRINT("RX: %c ERRORs 0x%x\n",
-                        (char)lChar, (lChar & 0xF00));
-#endif
         }
 
         //
@@ -479,23 +370,7 @@ USBUARTPrimeTransmit(unsigned long ulBase)
         //
         if(ulRead)
         {
-            //
-            // Place the character in the UART transmit FIFO.
-            //
-            UARTCharPutNonBlocking(ulBase, ucChar);
-
-            //
-            // If configured to do this, echo the character to the
-            // debug port.
-            //
-#ifdef ECHO_TO_DEBUG
-            DEBUG_PRINT("TX: %c\n", ucChar);
-#endif
-
-            //
-            // Update our count of bytes transmitted via the UART.
-            //
-            g_ulUARTTxCount++;
+        	USBBufferWrite((tUSBBuffer *)&g_sTxBuffer, (unsigned char *)&ucChar, 1);
         }
         else
         {
@@ -1024,12 +899,7 @@ ControlHandler(void *pvCBData, unsigned long ulEvent,
         // up in a release build or hang in a debug build.
         //
         default:
-#ifdef DEBUG
-            while(1);
-#else
             break;
-#endif
-
     }
 
     return(0);
@@ -1056,30 +926,6 @@ unsigned long
 TxHandler(void *pvCBData, unsigned long ulEvent, unsigned long ulMsgValue,
           void *pvMsgData)
 {
-    //
-    // Which event have we been sent?
-    //
-    switch(ulEvent)
-    {
-        case USB_EVENT_TX_COMPLETE:
-            //
-            // Since we are using the USBBuffer, we don't need to do anything
-            // here.
-            //
-            break;
-
-        //
-        // We don't expect to receive any other events.  Ignore any that show
-        // up in a release build or hang in a debug build.
-        //
-        default:
-#ifdef DEBUG
-            while(1);
-#else
-            break;
-#endif
-
-    }
     return(0);
 }
 
@@ -1104,9 +950,7 @@ unsigned long
 RxHandler(void *pvCBData, unsigned long ulEvent, unsigned long ulMsgValue,
           void *pvMsgData)
 {
-    unsigned long ulCount;
-
-    //
+	//
     // Which event are we being sent?
     //
     switch(ulEvent)
@@ -1121,7 +965,7 @@ RxHandler(void *pvCBData, unsigned long ulEvent, unsigned long ulMsgValue,
             // interrupt so we are told when there is more space.
             //
             USBUARTPrimeTransmit(USB_UART_BASE);
-            UARTIntEnable(USB_UART_BASE, UART_INT_TX);
+            //UARTIntEnable(USB_UART_BASE, UART_INT_TX);
             break;
         }
 
@@ -1138,8 +982,8 @@ RxHandler(void *pvCBData, unsigned long ulEvent, unsigned long ulMsgValue,
             // Get the number of bytes in the buffer and add 1 if some data
             // still has to clear the transmitter.
             //
-            ulCount = UARTBusy(USB_UART_BASE) ? 1 : 0;
-            return(ulCount);
+            //ulCount = UARTBusy(USB_UART_BASE) ? 1 : 0;
+            return(0);
         }
 
         //
@@ -1159,11 +1003,7 @@ RxHandler(void *pvCBData, unsigned long ulEvent, unsigned long ulMsgValue,
         // up in a release build or hang in a debug build.
         //
         default:
-#ifdef DEBUG
-            while(1);
-#else
             break;
-#endif
     }
 
     return(0);
@@ -1177,22 +1017,11 @@ RxHandler(void *pvCBData, unsigned long ulEvent, unsigned long ulMsgValue,
 int
 main(void)
 {
-    unsigned long ulTxCount;
-    unsigned long ulRxCount;
-    char pcBuffer[16];
-
     //
     // Set the clocking to run from the PLL at 50MHz
     //
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |
                    SYSCTL_XTAL_8MHZ);
-
-#if defined(DEBUG) && (USB_UART_BASE != UART0_BASE)
-    if(g_iHandle == 0)
-    {
-        g_iHandle = DiagOpenStdio();
-    }
-#endif
 
     //
     // Not configured initially.
@@ -1207,10 +1036,10 @@ main(void)
     //
     // Enable and configure the UART RX and TX pins
     //
-    SysCtlPeripheralEnable(TX_GPIO_PERIPH);
-    SysCtlPeripheralEnable(RX_GPIO_PERIPH);
-    GPIOPinTypeUART(TX_GPIO_BASE, TX_GPIO_PIN);
-    GPIOPinTypeUART(RX_GPIO_BASE, RX_GPIO_PIN);
+    //SysCtlPeripheralEnable(TX_GPIO_PERIPH);
+    //SysCtlPeripheralEnable(RX_GPIO_PERIPH);
+    //GPIOPinTypeUART(TX_GPIO_BASE, TX_GPIO_PIN);
+    //GPIOPinTypeUART(RX_GPIO_BASE, RX_GPIO_PIN);
 
     //
     // TODO: Add code to configure handshake GPIOs if required.
@@ -1219,16 +1048,16 @@ main(void)
     //
     // Set the default UART configuration.
     //
-    UARTConfigSetExpClk(USB_UART_BASE, SysCtlClockGet(), DEFAULT_BIT_RATE,
-                        DEFAULT_UART_CONFIG);
-    UARTFIFOLevelSet(USB_UART_BASE, UART_FIFO_TX4_8, UART_FIFO_RX4_8);
+    //UARTConfigSetExpClk(USB_UART_BASE, SysCtlClockGet(), DEFAULT_BIT_RATE,
+    //                    DEFAULT_UART_CONFIG);
+    //UARTFIFOLevelSet(USB_UART_BASE, UART_FIFO_TX4_8, UART_FIFO_RX4_8);
 
     //
     // Configure and enable UART interrupts.
     //
-    UARTIntClear(USB_UART_BASE, UARTIntStatus(USB_UART_BASE, false));
-    UARTIntEnable(USB_UART_BASE, (UART_INT_OE | UART_INT_BE | UART_INT_PE |
-                  UART_INT_FE | UART_INT_RT | UART_INT_TX | UART_INT_RX));
+    //UARTIntClear(USB_UART_BASE, UARTIntStatus(USB_UART_BASE, false));
+    //UARTIntEnable(USB_UART_BASE, (UART_INT_OE | UART_INT_BE | UART_INT_PE |
+    //              UART_INT_FE | UART_INT_RT | UART_INT_TX | UART_INT_RX));
 
     //
     // Enable the system tick.
@@ -1237,11 +1066,6 @@ main(void)
     SysTickIntEnable();
     SysTickEnable();
 
-    //
-    // Show the application name on the display and UART output.
-    //
-    DEBUG_PRINT("\nStellaris Serial CDC device example\n");
-    DEBUG_PRINT("-----------------------------------\n\n");
 
     //
     // Initialize the transmit and receive buffers.
@@ -1256,51 +1080,15 @@ main(void)
     USBDCDCInit(0, (tUSBDCDCDevice *)&g_sCDCDevice);
 
     //
-    // Clear our local byte counters.
-    //
-    ulRxCount = 0;
-    ulTxCount = 0;
-
-    //
     // Enable interrupts now that the application is ready to start.
     //
-    IntEnable(USB_UART_INT);
+    //IntEnable(USB_UART_INT);
 
     //
     // Main application loop.
     //
     while(1)
     {
-        //
-        // Has there been any transmit traffic since we last checked?
-        //
-        if(ulTxCount != g_ulUARTTxCount)
-        {
-            //
-            // Take a snapshot of the latest transmit count.
-            //
-            ulTxCount = g_ulUARTTxCount;
 
-            //
-            // Update the display of bytes transmitted by the UART.
-            //
-            usnprintf(pcBuffer, 16, "%d", ulTxCount);
-        }
-
-        //
-        // Has there been any receive traffic since we last checked?
-        //
-        if(ulRxCount != g_ulUARTRxCount)
-        {
-            //
-            // Take a snapshot of the latest receive count.
-            //
-            ulRxCount = g_ulUARTRxCount;
-
-            //
-            // Update the display of bytes received by the UART.
-            //
-            usnprintf(pcBuffer, 16, "%d", ulRxCount);
-        }
     }
 }
