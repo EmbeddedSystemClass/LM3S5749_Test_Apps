@@ -37,6 +37,7 @@
 
 #ifndef COMMAND_INTERPRETER_H
 #define COMMAND_INTERPRETER_H
+#include <stdint.h>
 
 /* The prototype to which callback functions used to process command line
 commands must comply.  pcWriteBuffer is a buffer into which the output from 

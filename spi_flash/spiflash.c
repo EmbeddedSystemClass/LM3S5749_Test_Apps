@@ -14,11 +14,6 @@
 
 #include "utils/uartstdio.h"
 
-// M25P80 Memory Definitions
-#define FLASH_SIZE (1 * 1024 * 1024) 	// 1MB
-#define FLASH_SECTOR_SIZE (64 * 1024) 	// 64KB
-#define FLASH_PAGE_SIZE (256)			// 256B
-
 // Instruction Definitions
 #define WREN		0x06 // Write Enable
 #define WRDI		0x04 // Write Disable

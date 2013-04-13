@@ -18,6 +18,11 @@
 #define false 0
 #endif
 
+// M25P80 Memory Definitions
+#define FLASH_SIZE (1 * 1024 * 1024) 	// 1MB
+#define FLASH_SECTOR_SIZE (64 * 1024) 	// 64KB
+#define FLASH_PAGE_SIZE (256)			// 256B
+
 void SPIFLASH_Init(void);
 void SPIFLASH_Write_Enable(void);
 void SPIFLASH_Write_Disable(void);

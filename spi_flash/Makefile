@@ -58,6 +58,7 @@ VPATH+=../../../utils
 IPATH=.
 IPATH+=..
 IPATH+=../../..
+IPATH+=../../../utils
 IPATH+=./FreeRTOSV7.3.0/FreeRTOS
 IPATH+=./FreeRTOSV7.3.0/FreeRTOS/Source/include
 IPATH+=./FreeRTOSV7.3.0/FreeRTOS/Source/portable/GCC/ARM_CM3
@@ -86,9 +87,12 @@ ${COMPILER}:
 #
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/freertos_demo.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/heap_2.o
+${COMPILER}/freertos_demo.axf: ${COMPILER}/syscalls.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/test_task.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/spiflash.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/FreeRTOS_CLI.o
+${COMPILER}/freertos_demo.axf: ${COMPILER}/cli_task.o
+${COMPILER}/freertos_demo.axf: ${COMPILER}/spiflash_cli.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/list.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/port.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/queue.o
@@ -97,8 +101,6 @@ ${COMPILER}/freertos_demo.axf: ${COMPILER}/tasks.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/uartstdio.o
 ${COMPILER}/freertos_demo.axf: ${COMPILER}/ustdlib.o
 ${COMPILER}/freertos_demo.axf: ${ROOT}/driverlib/${COMPILER}-cm3/libdriver-cm3.a
-#${COMPILER}/freertos_demo.axf: freertos_demo.ld
-#SCATTERgcc_freertos_demo=freertos_demo.ld
 ${COMPILER}/freertos_demo.axf: boot_loader.ld
 SCATTERgcc_freertos_demo=boot_loader.ld
 ENTRY_freertos_demo=ResetISR
