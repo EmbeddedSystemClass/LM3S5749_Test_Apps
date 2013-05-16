@@ -81,6 +81,7 @@
 #define configUSE_MUTEXES                   1
 #define configUSE_RECURSIVE_MUTEXES         1
 #define configCHECK_FOR_STACK_OVERFLOW      2
+#define configGENERATE_RUN_TIME_STATS		1
 
 #define configMAX_PRIORITIES                ( ( unsigned portBASE_TYPE ) 16 )
 #define configMAX_CO_ROUTINE_PRIORITIES     ( 2 )
@@ -103,6 +104,12 @@ to exclude the API function. */
  */
 #define configKERNEL_INTERRUPT_PRIORITY         ( 7 << 5 )    /* Priority 7, or 0xE0 as only the top three bits are implemented.  This is the lowest priority. */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY     ( 5 << 5 )  /* Priority 5, or 0xA0 as only the top three bits are implemented. */
+
+extern volatile unsigned long ulHighFrequencyTimerTicks;
+/* There is already a high frequency timer running - just reset its count back
+to zero. */
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() ( ulHighFrequencyTimerTicks = 0UL )
+#define portGET_RUN_TIME_COUNTER_VALUE()	ulHighFrequencyTimerTicks
 
 /* Max command size for CLI */
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE	128

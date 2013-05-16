@@ -24,8 +24,8 @@
 
 MEMORY
 {
-    FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x00040000
-    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00008000
+    FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x00020000
+    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00010000
 }
 
 SECTIONS
@@ -53,5 +53,13 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         _ebss = .;
+        . = ALIGN (8);
+		_end = .;
     } > SRAM
+    
+    /* .ARM.exidx is sorted, so has to go in its own output section.  */
+	.ARM.exidx :
+	{
+		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
+	} > SRAM
 }

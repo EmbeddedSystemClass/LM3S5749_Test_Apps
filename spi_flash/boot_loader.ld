@@ -2,30 +2,14 @@
  *
  * Linker configuration file for USB boot loader.
  *
- * Copyright (c) 2008-2012 Texas Instruments Incorporated.  All rights reserved.
- * Software License Agreement
- * 
- * Texas Instruments (TI) is supplying this software for use solely and
- * exclusively on TI's microcontroller products. The software is owned by
- * TI and/or its suppliers, and is protected under applicable copyright
- * laws. You may not combine this software with "viral" open-source
- * software in order to form a larger program.
- * 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
- * NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
- * NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
- * CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
- * DAMAGES, FOR ANY REASON WHATSOEVER.
- * 
- * This is part of revision 9453 of the EK-LM3S5749 Firmware Package.
+ * LM3S5749.
  *
  *****************************************************************************/
 
 MEMORY
 {
-    FLASH (rx) : ORIGIN = 0x00001800, LENGTH = 0x0001e800
-    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00010000
+    FLASH (rx) : ORIGIN = 0x00001800, LENGTH = 0x0001e800 /* 128KB - 6KB for bootloader */
+    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00010000 /* 64KB */
 }
 
 SECTIONS
@@ -56,4 +40,10 @@ SECTIONS
         . = ALIGN (8);
 		_end = .;
     } > SRAM
+    
+    /* .ARM.exidx is sorted, so has to go in its own output section.  */
+	.ARM.exidx :
+	{
+		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
+	} > SRAM
 }

@@ -1,5 +1,7 @@
 #include <sys/types.h>
+#include <sys/stat.h>
 #include "utils/uartstdio.h"
+#include "usb_serial.h"
 
 
 caddr_t _sbrk(int incr)
@@ -26,8 +28,7 @@ caddr_t _sbrk(int incr)
 
 int _write(int file, char *ptr, int len)
 {
-	UARTwrite(ptr, len);
-	return len;
+	return USBSerialWrite(ptr, len);
 }
 
 int _close(int file)
@@ -35,7 +36,6 @@ int _close(int file)
 	return -1;
 }
 
-#include <sys/stat.h>
 int _fstat(int file, struct stat *st)
 {
 	st->st_mode = S_IFCHR;
@@ -54,7 +54,7 @@ int _open(const char *name, int flags, int mode)
 
 int _read(int file, char *ptr, int len)
 {
-	return 0;
+	return USBSerialRead(ptr, len);
 }
 
 int _stat(char *file, struct stat *st)
@@ -67,4 +67,3 @@ int _lseek(int file, int ptr, int dir)
 {
 	return 0;
 }
-

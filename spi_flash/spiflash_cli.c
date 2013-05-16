@@ -17,7 +17,7 @@ static portBASE_TYPE readStatusRegisterCbk(int8_t* writeBuffer, size_t writeBuff
 	unsigned char regVal;
 	SPIFLASH_Read_Status_Register(&regVal);
 	memcpy(writeBuffer, "cmd output", 10);
-	usprintf((char*)writeBuffer, "Status Reg = 0x%x\n", regVal);
+	usprintf((char*)writeBuffer, "Status Reg = 0x%x\n\r", regVal);
 	writeBufferLen = strlen((char*)writeBuffer);
 	return ret;
 }
@@ -52,18 +52,18 @@ static portBASE_TYPE dispCbk(int8_t* writeBuffer, size_t writeBufferLen, const i
 
 	if(numBlanks)
 	{
-		UARTprintf("\r\n[0x%04x]  ", addr - numBlanks);
+		printf("\r\n[0x%04x]  ", addr - numBlanks);
 		for(; numBlanks > 0; numBlanks--)
-			UARTprintf(".. ");
+			printf(".. ");
 	}
 
 	for(i = 0; count > 0; count--, addr++)
 	{
 		if(!(addr % PRINT_ROW_CNT))
-			UARTprintf("\r\n[0x%04x]  ", addr);
-		UARTprintf("%02x ", data[i++]);
+			printf("\r\n[0x%04x]  ", addr);
+		printf("%02x ", data[i++]);
 	}
-	UARTprintf("\r\n");
+	printf("\r\n");
 
 	*writeBuffer = 0;
 	writeBufferLen = 0;
@@ -77,7 +77,7 @@ static portBASE_TYPE sectorEraseCbk(int8_t* writeBuffer, size_t writeBufferLen, 
 	long int paramLen = 0;
 	const int8_t* param = FreeRTOS_CLIGetParameter(cmdString, 1, &paramLen);
 	sector = atoi((char*)param);
-	UARTprintf("Erasing Sector %d...\r\n", sector / FLASH_SECTOR_SIZE);
+	printf("Erasing Sector %d...\r\n", sector / FLASH_SECTOR_SIZE);
 	SPIFLASH_Sector_Erase(sector);
 	*writeBuffer = 0;
 	writeBufferLen = 0;
@@ -110,7 +110,7 @@ static portBASE_TYPE writeCbk(int8_t* writeBuffer, size_t writeBufferLen, const 
 static const CLI_Command_Definition_t readStatusRegisterCmd =
 {
 	(const int8_t* const) "SpiFlashReadStatusReg",
-	(const int8_t* const) "SpiFlashReadStatusReg:\r\n Reads the SPI Flash status register\r\n\r\n",
+	(const int8_t* const) "SpiFlashReadStatusReg:\r\n  Reads the SPI Flash status register\r\n",
 	readStatusRegisterCbk,
 	0
 };
@@ -118,7 +118,7 @@ static const CLI_Command_Definition_t readStatusRegisterCmd =
 static const CLI_Command_Definition_t writeStatusRegisterCmd =
 {
 	(const int8_t* const) "SpiFlashWriteStatusReg",
-	(const int8_t* const) "SpiFlashWriteStatusReg:\r\n Write [param1] to SPI Flash status register\r\n\r\n",
+	(const int8_t* const) "SpiFlashWriteStatusReg:\r\n  Write [param1] to SPI Flash status register\r\n",
 	writeStatusRegisterCbk,
 	1
 };
@@ -126,7 +126,7 @@ static const CLI_Command_Definition_t writeStatusRegisterCmd =
 static const CLI_Command_Definition_t dispCmd =
 {
 	(const int8_t* const) "disp",
-	(const int8_t* const) "disp:\r\n Display [param2] number of bytes of SPI Flash data starting at address [param1]\r\n\r\n",
+	(const int8_t* const) "disp:\r\n  Display [param2] number of bytes of SPI Flash data starting at address [param1]\r\n",
 	dispCbk,
 	2
 };
@@ -134,7 +134,7 @@ static const CLI_Command_Definition_t dispCmd =
 static const CLI_Command_Definition_t sectorEraseCmd =
 {
 	(const int8_t* const) "SectorErase",
-	(const int8_t* const) "SectorErase:\r\n Erase sector [param1] of SPI Flash\r\n\r\n",
+	(const int8_t* const) "SectorErase:\r\n  Erase sector [param1] of SPI Flash\r\n",
 	sectorEraseCbk,
 	1
 };
@@ -142,7 +142,7 @@ static const CLI_Command_Definition_t sectorEraseCmd =
 static const CLI_Command_Definition_t writeCmd =
 {
 	(const int8_t* const) "w",
-	(const int8_t* const) "w:\r\n Write byte [param2] to address [param1] of SPI Flash\r\n\r\n",
+	(const int8_t* const) "w:\r\n  Write byte [param2] to address [param1] of SPI Flash\r\n",
 	writeCbk,
 	2
 };

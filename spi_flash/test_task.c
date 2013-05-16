@@ -9,6 +9,10 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include <stdio.h>
+
+
+#include "lcd.h"
 
 #include "spiflash.h"
 
@@ -34,10 +38,7 @@
 //*****************************************************************************
 static void TestTask(void *pvParameters)
 {
-    portTickType ulWakeTime;
-
-    // Get the current tick count.
-    ulWakeTime = xTaskGetTickCount();
+	lcdInit();
 
     // Loop forever.
     while(1)
@@ -61,8 +62,17 @@ static void TestTask(void *pvParameters)
            	*/
         }
 
+        {
+        	//i++;
+        	//char buff;
+        	//int cnt = USBSerialRead(&buff, 1);
+        	//printf("count: %d\n\r", i);
+        	//printf("%d\n", cnt);
+        	//printf("printf test\n\r");
+        }
+
         // Wait for the required amount of time.
-        vTaskDelayUntil(&ulWakeTime, 5000 * portTICK_RATE_MS);
+        vTaskDelay(1000 * portTICK_RATE_MS);
     }
 }
 

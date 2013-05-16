@@ -14,6 +14,11 @@
 #include "semphr.h"
 #include "spiflash.h"
 #include "spiflash_cli.h"
+#include "misc_cli.h"
+#include "usb_serial.h"
+#include "timer.h"
+#include "lcd.h"
+
 
 //*****************************************************************************
 //
@@ -56,9 +61,10 @@ int main(void)
 	ROM_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 	UARTStdioInit(0);
 
+	USBSerialInit();
 	SPIFLASH_Init();
 
-    // Create the tasks.
+	// Create the tasks.
     if(TestTaskInit() != 0)
     {
         while(1)
@@ -71,7 +77,12 @@ int main(void)
 			;
 	}
 
+    registerMiscCmds();
     SpiFlashRegisterCmds();
+
+
+    // Configure the high frequency interrupt used to measure the interrupt jitter time.
+    vSetupHighFrequencyTimer();
 
     // Start the scheduler.  This should not return.
     vTaskStartScheduler();

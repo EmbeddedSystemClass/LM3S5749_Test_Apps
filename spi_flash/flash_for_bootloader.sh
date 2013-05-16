@@ -1,0 +1,1 @@
+./dfuprog.exe -f gcc/freertos_demo.bin -a 0x1800
