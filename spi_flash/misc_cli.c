@@ -40,6 +40,35 @@ static portBASE_TYPE testCbk(int8_t* writeBuffer, size_t writeBufferLen, const i
 	return ret;
 }
 
+static portBASE_TYPE boxCbk(int8_t* writeBuffer, size_t writeBufferLen, const int8_t* cmdString)
+{
+	portBASE_TYPE ret = 0;
+	unsigned short x1, y1, x2, y2;
+	unsigned char r, g, b;
+	long int paramLen = 0;
+	const int8_t* param;
+	param = FreeRTOS_CLIGetParameter(cmdString, 1, &paramLen);
+	x1 = atoi((char*)param);
+	param = FreeRTOS_CLIGetParameter(cmdString, 2, &paramLen);
+	y1 = atoi((char*)param);
+	param = FreeRTOS_CLIGetParameter(cmdString, 3, &paramLen);
+	x2 = atoi((char*)param);
+	param = FreeRTOS_CLIGetParameter(cmdString, 4, &paramLen);
+	y2 = atoi((char*)param);
+	param = FreeRTOS_CLIGetParameter(cmdString, 5, &paramLen);
+	r = atoi((char*)param);
+	param = FreeRTOS_CLIGetParameter(cmdString, 6, &paramLen);
+	g = atoi((char*)param);
+	param = FreeRTOS_CLIGetParameter(cmdString, 7, &paramLen);
+	b = atoi((char*)param);
+
+	drawBox(x1, y1, x2, y2, r, g, b);
+
+	*writeBuffer = 0;
+	writeBufferLen = 0;
+	return ret;
+}
+
 /* CLI Command Definitions */
 static const CLI_Command_Definition_t printRunTimeStatsCmd =
 {
@@ -57,9 +86,18 @@ static const CLI_Command_Definition_t testCmd =
 	3
 };
 
+static const CLI_Command_Definition_t boxCmd =
+{
+	(const int8_t* const) "box",
+	(const int8_t* const) "box:\r\n  Draw box x1 y1 x2 y2 r g b\r\n",
+	boxCbk,
+	7
+};
+
 /* Called at startup to register commands */
 void registerMiscCmds(void)
 {
 	FreeRTOS_CLIRegisterCommand(&printRunTimeStatsCmd);
 	FreeRTOS_CLIRegisterCommand(&testCmd);
+	FreeRTOS_CLIRegisterCommand(&boxCmd);
 }
