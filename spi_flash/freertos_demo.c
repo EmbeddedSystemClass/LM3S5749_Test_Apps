@@ -62,7 +62,11 @@ int main(void)
 	UARTStdioInit(0);
 
 	USBSerialInit();
+
+#if 0
 	SPIFLASH_Init();
+	SpiFlashRegisterCmds();
+#endif
 
 	// Create the tasks.
     if(TestTaskInit() != 0)
@@ -78,8 +82,6 @@ int main(void)
 	}
 
     registerMiscCmds();
-    SpiFlashRegisterCmds();
-
 
     // Configure the high frequency interrupt used to measure the interrupt jitter time.
     vSetupHighFrequencyTimer();

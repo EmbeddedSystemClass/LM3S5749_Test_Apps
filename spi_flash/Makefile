@@ -89,12 +89,10 @@ ${COMPILER}/freertos_demo.axf: 	${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/heap_2.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/syscalls.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/test_task.o
-${COMPILER}/freertos_demo.axf: 	${COMPILER}/spiflash.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/timer.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/lcd.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/FreeRTOS_CLI.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/cli_task.o
-${COMPILER}/freertos_demo.axf: 	${COMPILER}/spiflash_cli.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/misc_cli.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/list.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/port.o
@@ -102,7 +100,6 @@ ${COMPILER}/freertos_demo.axf: 	${COMPILER}/queue.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/tasks.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/uartstdio.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/ustdlib.o
-${COMPILER}/freertos_demo.axf: 	${COMPILER}/ringbuf.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/usb_serial.o
 ${COMPILER}/freertos_demo.axf: 	${COMPILER}/freertos_demo.o
 ${COMPILER}/freertos_demo.axf: 	${ROOT}/usblib/${COMPILER}-cm3/libusb-cm3.a

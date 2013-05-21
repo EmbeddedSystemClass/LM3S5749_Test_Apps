@@ -212,77 +212,54 @@ void drawBox(unsigned short x1, unsigned short y1, unsigned short x2, unsigned s
 
 
 
-void drawpic(unsigned short x1, unsigned short y1, unsigned short x2, unsigned short y2, unsigned char* pic)
+void drawpic(unsigned short x, unsigned short y, unsigned int width, unsigned int height, unsigned char* pic)
 {
-		unsigned char buffer[4];
-		unsigned int i, j, k;
-		//unsigned short xl, yl;
-		unsigned short x , y;
+	unsigned char buffer[4];
+	unsigned int i, j, k;
 
-		buffer[0] = 0x80;
-		writeCycle(0x36, buffer, 1);	// Memory Access Control BGR
-#if 0
-		xl = x-1;
-		yl = y-1;
+	buffer[0] = 0x88;
+	writeCycle(0x36, buffer, 1);	// Memory Access Control BGR
 
-		buffer[0] = 0x00;
-		buffer[1] = 0x00;
-		buffer[2] = (xl & 0xFF00) >> 8;
-		buffer[3] = (xl & 0x00FF);
-		writeCycle(0x2A, buffer, 4); 	// Column Address SC=0x00 EC=0xEF
+	buffer[0] = (x & 0xFF00) >> 8;
+	buffer[1] = (x & 0x00FF);
+	buffer[2] = ((x + height - 1) & 0xFF00) >> 8;
+	buffer[3] = ((x + height - 1) & 0x00FF);
+	writeCycle(0x2A, buffer, 4); 	// Column Address
 
-		buffer[0] = 0x00;
-		buffer[1] = 0x00;
-		buffer[2] = (yl & 0xFF00) >> 8;
-		buffer[3] = (yl & 0x00FF);
-		writeCycle(0x2B, buffer, 4); 	// Page Address SP=0x00 EP=0x13F
-#else
-		x = x2 - x1;
-		y = y2 - y1;
-		x2--;
-		y2--;
-		buffer[0] = (x1 & 0xFF00) >> 8;
-		buffer[1] = (x1 & 0x00FF);
-		buffer[2] = (x2 & 0xFF00) >> 8;
-		buffer[3] = (x2 & 0x00FF);
-		writeCycle(0x2A, buffer, 4); 	// Column Address
+	buffer[0] = (y & 0xFF00) >> 8;
+	buffer[1] = (y & 0x00FF);
+	buffer[2] = ((y + width - 1) & 0xFF00) >> 8;
+	buffer[3] = ((y + width - 1) & 0x00FF);
+	writeCycle(0x2B, buffer, 4); 	// Page Address
 
-		buffer[0] = (y1 & 0xFF00) >> 8;
-		buffer[1] = (y1 & 0x00FF);
-		buffer[2] = (y2 & 0xFF00) >> 8;
-		buffer[3] = (y2 & 0x00FF);
-		writeCycle(0x2B, buffer, 4); 	// Page Address
-#endif
+	writeCycle(0x2C, 0, 0); 		// Memory Write
+	CSX(0);
+	SET_DATA_LINES_OUTPUT();
+	delayNS(33);
 
-		writeCycle(0x2C, 0, 0); 		// Memory Write
-		CSX(0);
-		SET_DATA_LINES_OUTPUT();
-		delayNS(33);
-
-		k = 0;
-		for(i = 0; i < y; i++)
+	k = 0;
+	for(i = 0; i < height; i++)
+	{
+		for(j = 0; j < width; j++)
 		{
-			for(j = 0; j < x; j++)
-			{
-				WRX(0);
-				setDataBus(pic[k++]);
-				delayNS(33);
-				WRX(1);
-				delayNS(33);
-				WRX(0);
-				setDataBus(pic[k++]);
-				delayNS(33);
-				WRX(1);
-				delayNS(33);
-				WRX(0);
-				setDataBus(pic[k++]);
-				delayNS(33);
-				WRX(1);
-				delayNS(33);
-			}
-			k+=2;
+			WRX(0);
+			setDataBus(pic[k++]);
+			delayNS(33);
+			WRX(1);
+			delayNS(33);
+			WRX(0);
+			setDataBus(pic[k++]);
+			delayNS(33);
+			WRX(1);
+			delayNS(33);
+			WRX(0);
+			setDataBus(pic[k++]);
+			delayNS(33);
+			WRX(1);
+			delayNS(33);
 		}
-		CSX(1);
+	}
+	CSX(1);
 }
 
 void fillDisplay(unsigned char r, unsigned char g, unsigned char b)
@@ -416,7 +393,11 @@ void lcdInit(void)
 	buffer[3] = 0x3F;
 	writeCycle(0x2B, buffer, 4); 	// Page Address SP=0x00 EP=0x13F
 
-	fillDisplay(255, 255, 255);
+
+	//fillDisplay(255, 255, 255);
+	fillDisplay(0, 0, 0);
+
 	//drawpic(95, 129, 145, 192, picture); // 50x63
-	drawpic(0, 0, 85, 85, picture);
+	//drawpic(0, 0, 85, 85, picture);
+	drawpic(0, 0, PICTURE_WIDTH, PICTURE_HEIGHT, picture);
 }
